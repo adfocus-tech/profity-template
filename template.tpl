@@ -276,6 +276,7 @@ const queryPermission = require('queryPermission');
 const encode = require('encodeUriComponent');
 const sendPixel = require('sendPixel');
 const log = require('logToConsole');
+const encodeUriComponent = require('encodeUriComponent');
 
 const profityId = data.profityId;
 const enableProfityLayer = data.enableProfityLayer;
@@ -289,28 +290,31 @@ const country = data.country;
 let baseUrl = '';
 
 
+
 switch (country){
   case "ch":
-    baseUrl = 'https://www.profity.ch/imp/?s=';
+    baseUrl = 'https://www.profity.ch/imp/?';
     break;
   case "at":
-    baseUrl = 'https://www.profity.at/imp/?s=';
+    baseUrl = 'https://www.profity.at/imp/?';
     break;
   case "de":
-    baseUrl = 'https://www.profity.de/imp/?s=';
+    baseUrl = 'https://www.profity.de/imp/?';
     break;
   default:
-    baseUrl = 'https://www.profity.online/imp/?s=';
+    baseUrl = 'https://www.profity.online/imp/?';
     break;    
 }
   
+let profityQueryInput = 's=' + profityId + '&b=6&lp=1&ordervalue=' + orderValue + '&ordernumber=' + orderNumber;
 
-let profityUrl = baseUrl + profityId + '&ordervalue=' + orderValue + '&ordernumber=' + orderNumber;
+
+voucherCode ? profityQueryInput += '&vouchercode=' + encode(voucherCode) : '';
+email ? profityQueryInput += '&email=' + encode(email) : '';
+subText ? profityQueryInput += '&subtext=' + encode(subText) : '';
+
+let profityUrl = baseUrl + encodeUriComponent(profityQueryInput);
 let getbackUrl = 'https://www.getback.ch/' + getbackId;
-
-voucherCode ? profityUrl += '&vouchercode=' + encode(voucherCode) : '';
-email ? profityUrl += '&email=' + encode(email) : '';
-subText ? profityUrl += '&subtext=' + encode(subText) : '';
 
 const onSuccess = () => {
  log('Loaded Successfully'); 
@@ -324,7 +328,7 @@ if (queryPermission('send_pixel', profityUrl)) {
     sendPixel(profityUrl);
 	
   	if (enableProfityLayer === true){
-      injectScript(getbackUrl, onSuccess, data.gtmOnFailure());
+      injectScript(getbackUrl, onSuccess, data.gtmOnFailure);
 
     }
   
