@@ -274,15 +274,15 @@ ___SANDBOXED_JS_FOR_WEB_TEMPLATE___
 const injectScript = require('injectScript');
 const queryPermission = require('queryPermission');
 const encode = require('encodeUriComponent');
+const makeString = require('makeString');
 const sendPixel = require('sendPixel');
 const log = require('logToConsole');
-const encodeUriComponent = require('encodeUriComponent');
 
-const profityId = data.profityId;
+const profityId = encode(makeString(data.profityId));
 const enableProfityLayer = data.enableProfityLayer;
 const getbackId = data.getbackId;
-const orderValue = data.orderValue;
-const orderNumber = data.orderNumber;
+const orderValue = encode(makeString(data.orderValue));
+const orderNumber = encode(makeString(data.orderNumber));
 const voucherCode = data.voucherCode;
 const email = data.email;
 const subText = data.customInformation;
@@ -306,35 +306,25 @@ switch (country){
     break;    
 }
   
-let profityQueryInput = 's=' + profityId + '&b=6&lp=1&ordervalue=' + orderValue + '&ordernumber=' + orderNumber;
-
-
-voucherCode ? profityQueryInput += '&vouchercode=' + encode(voucherCode) : '';
-email ? profityQueryInput += '&email=' + encode(email) : '';
-subText ? profityQueryInput += '&subtext=' + encode(subText) : '';
-
-let profityUrl = baseUrl + encodeUriComponent(profityQueryInput);
+let profityUrl = baseUrl + 's=' + profityId + '&b=6&lp=1&ordervalue=' + orderValue + '&ordernumber=' + orderNumber;
 let getbackUrl = 'https://www.getback.ch/' + getbackId;
+
+voucherCode ? profityUrl += '&vouchercode=' + encode(makeString(voucherCode)) : '';
+email ? profityUrl += '&email=' + encode(makeString(email)) : '';
+subText ? profityUrl += '&subtext=' + encode(makeString(subText)) : '';
+
 
 const onSuccess = () => {
  log('Loaded Successfully'); 
  data.gtmOnSuccess();
 };
 
-// If the URL input by the user matches the permissions set for the template,
-// inject the script with the onSuccess and onFailure methods as callbacks.
-if (queryPermission('send_pixel', profityUrl)) {
-  
-    sendPixel(profityUrl);
-	
-  	if (enableProfityLayer === true){
-      injectScript(getbackUrl, onSuccess, data.gtmOnFailure);
 
-    }
   
- 	
-} else {
-  data.gtmOnFailure();
+sendPixel(profityUrl);
+	
+if (enableProfityLayer === true){
+  injectScript(getbackUrl, onSuccess, data.gtmOnFailure());
 }
 
 
