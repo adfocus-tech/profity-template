@@ -280,7 +280,7 @@ const log = require('logToConsole');
 
 const profityId = encode(makeString(data.profityId));
 const enableProfityLayer = data.enableProfityLayer;
-const getbackId = data.getbackId;
+const getbackId = encode(makeString(data.getbackId));
 const orderValue = encode(makeString(data.orderValue));
 const orderNumber = encode(makeString(data.orderNumber));
 const voucherCode = data.voucherCode;
@@ -314,19 +314,13 @@ email ? profityUrl += '&email=' + encode(makeString(email)) : '';
 subText ? profityUrl += '&subtext=' + encode(makeString(subText)) : '';
 
 
-const onSuccess = () => {
- log('Loaded Successfully'); 
- data.gtmOnSuccess();
-};
-
-
-  
 sendPixel(profityUrl);
 	
 if (enableProfityLayer === true){
-  injectScript(getbackUrl, onSuccess, data.gtmOnFailure());
+  injectScript(getbackUrl, data.gtmOnSuccess, data.gtmOnFailure);
 }
 
+data.gtmOnSuccess();
 
 ___NOTES___
 
