@@ -40,6 +40,10 @@ ___TEMPLATE_PARAMETERS___
       {
         "displayValue": "Poland",
         "value": "pl"
+      },
+      {
+        "displayValue": "Sweden",
+        "value": "se"
       }
     ],
     "displayName": "Country",
@@ -48,11 +52,34 @@ ___TEMPLATE_PARAMETERS___
     "type": "SELECT"
   },
   {
+    "selectItems": [
+      {
+        "displayValue": "Landing Page",
+        "value": "landingpage"
+      },
+      {
+        "displayValue": "Conversion",
+        "value": "conversion"
+      }
+    ],
     "enablingConditions": [
       {
         "paramName": "country",
         "type": "PRESENT",
         "paramValue": ""
+      }
+    ],
+    "displayName": "Type",
+    "simpleValueType": true,
+    "name": "type",
+    "type": "SELECT"
+  },
+  {
+    "enablingConditions": [
+      {
+        "paramName": "type",
+        "type": "EQUALS",
+        "paramValue": "conversion"
       }
     ],
     "displayName": "Settings",
@@ -79,6 +106,7 @@ ___TEMPLATE_PARAMETERS___
             "type": "NON_EMPTY"
           }
         ],
+        "enablingConditions": [],
         "displayName": "Order Number",
         "simpleValueType": true,
         "name": "orderNumber",
@@ -91,6 +119,7 @@ ___TEMPLATE_PARAMETERS___
             "type": "NON_EMPTY"
           }
         ],
+        "enablingConditions": [],
         "displayName": "Order Value",
         "simpleValueType": true,
         "name": "orderValue",
@@ -98,13 +127,15 @@ ___TEMPLATE_PARAMETERS___
       },
       {
         "help": "Dynamic Voucher Code on checkout complete page",
+        "enablingConditions": [],
         "displayName": "Voucher Code",
         "simpleValueType": true,
-        "name": "text1voucherCode",
+        "name": "voucherCode",
         "type": "TEXT"
       },
       {
         "help": "Enable if you want to use the Profity Gift Layer",
+        "enablingConditions": [],
         "defaultValue": false,
         "simpleValueType": true,
         "name": "enableProfityLayer",
@@ -128,6 +159,13 @@ ___TEMPLATE_PARAMETERS___
     ]
   },
   {
+    "enablingConditions": [
+      {
+        "paramName": "type",
+        "type": "EQUALS",
+        "paramValue": "conversion"
+      }
+    ],
     "displayName": "Add more information",
     "name": "addMoreInformation",
     "groupStyle": "ZIPPY_OPEN",
@@ -198,44 +236,30 @@ ___WEB_PERMISSIONS___
               {
                 "type": 1,
                 "string": "https://*.getback.ch/*"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    "clientAnnotations": {
-      "isEditedByUser": true
-    },
-    "isRequired": true
-  },
-  {
-    "instance": {
-      "key": {
-        "publicId": "send_pixel",
-        "versionId": "1"
-      },
-      "param": [
-        {
-          "key": "urls",
-          "value": {
-            "type": 2,
-            "listItem": [
-              {
-                "type": 1,
-                "string": "https://*.profity.ch/*"
               },
               {
                 "type": 1,
-                "string": "https://*.profity.at/*"
+                "string": "https://static.profity.ch/*"
               },
               {
                 "type": 1,
-                "string": "https://*.profity.de/*"
+                "string": "https://static.shopmate.de/*"
               },
               {
                 "type": 1,
-                "string": "https://*.profity.online/*"
+                "string": "https://static.pl.profity.shop/*"
+              },
+              {
+                "type": 1,
+                "string": "https://static.profity.online/*"
+              },
+              {
+                "type": 1,
+                "string": "https://static.profity.at/*"
+              },
+              {
+                "type": 1,
+                "string": "https://static.profity.se/*"
               }
             ]
           }
@@ -275,7 +299,6 @@ const injectScript = require('injectScript');
 const queryPermission = require('queryPermission');
 const encode = require('encodeUriComponent');
 const makeString = require('makeString');
-const sendPixel = require('sendPixel');
 const log = require('logToConsole');
 
 const profityId = encode(makeString(data.profityId));
@@ -293,34 +316,45 @@ let baseUrl = '';
 
 switch (country){
   case "ch":
-    baseUrl = 'https://www.profity.ch/imp/?';
+    baseUrl = 'https://static.profity.ch';
     break;
   case "at":
-    baseUrl = 'https://www.profity.at/imp/?';
+    baseUrl = 'https://static.profity.at';
     break;
   case "de":
-    baseUrl = 'https://www.profity.de/imp/?';
+    baseUrl = 'https://static.shopmate.de';
+    break;
+  case "pl":
+    baseUrl = 'https://static.pl.profity.shop';
+    break;
+  case "se":
+    baseUrl = 'https://static.profity.se';
     break;
   default:
-    baseUrl = 'https://www.profity.online/imp/?';
+    baseUrl = 'https://static.profity.online';
     break;    
 }
+
+if (data.type == 'landingpage'){
+  baseUrl += '/clients/main.js';
+  injectScript(baseUrl, data.gtmOnSuccess, data.gtmOnFailure);
+} else if(data.type == 'conversion') {
+  let profityUrl = baseUrl + '/clients/conversion.js?s=' + profityId + '&ordervalue=' + orderValue + '&ordernumber=' + orderNumber;
+  let getbackUrl = 'https://www.getback.ch/' + getbackId;
+
+  voucherCode ? profityUrl += '&vouchercode=' + encode(makeString(voucherCode)) : '';
+  email ? profityUrl += '&email=' + encode(makeString(email)) : '';
+  subText ? profityUrl += '&subtext=' + encode(makeString(subText)) : '';
+
+  injectScript(profityUrl);
+
+  if (enableProfityLayer === true){
+    injectScript(getbackUrl, data.gtmOnSuccess, data.gtmOnFailure);
+  }
   
-let profityUrl = baseUrl + 's=' + profityId + '&b=6&lp=1&ordervalue=' + orderValue + '&ordernumber=' + orderNumber;
-let getbackUrl = 'https://www.getback.ch/' + getbackId;
-
-voucherCode ? profityUrl += '&vouchercode=' + encode(makeString(voucherCode)) : '';
-email ? profityUrl += '&email=' + encode(makeString(email)) : '';
-subText ? profityUrl += '&subtext=' + encode(makeString(subText)) : '';
-
-
-sendPixel(profityUrl);
-	
-if (enableProfityLayer === true){
-  injectScript(getbackUrl, data.gtmOnSuccess, data.gtmOnFailure);
+  data.gtmOnSuccess();
 }
 
-data.gtmOnSuccess();
 
 ___NOTES___
 
