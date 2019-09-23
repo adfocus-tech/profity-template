@@ -1,0 +1,5 @@
+homepage: "www.profity.online" ,
+documentation: "https://docs.profity.online" ,
+versions:
+- sha: da03ada
+  changeNotes: Initial release.
