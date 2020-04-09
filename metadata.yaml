@@ -1,5 +1,5 @@
 homepage: "www.profity.online" ,
 documentation: "https://docs.profity.online" ,
 versions:
-- sha: b3fbc17
-  changeNotes: Initial release.
+- sha: 612081a
+  changeNotes: Add Profity UK
