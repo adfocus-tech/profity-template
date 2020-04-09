@@ -52,6 +52,10 @@ ___TEMPLATE_PARAMETERS___
       {
         "displayValue": "Sweden",
         "value": "se"
+      },
+      {
+        "value": "uk",
+        "displayValue": "UK"
       }
     ],
     "displayName": "Country",
@@ -96,7 +100,7 @@ ___TEMPLATE_PARAMETERS___
     "type": "GROUP",
     "subParams": [
       {
-        "help": "Enter your Profity ID which we've provided to you.",
+        "help": "Enter your Profity ID which we\u0027ve provided to you.",
         "valueValidators": [
           {
             "type": "NON_EMPTY"
@@ -151,7 +155,7 @@ ___TEMPLATE_PARAMETERS___
         "type": "CHECKBOX"
       },
       {
-        "help": "Enter your Getback ID which we've provided to you.",
+        "help": "Enter your Getback ID which we\u0027ve provided to you.",
         "enablingConditions": [
           {
             "paramName": "enableProfityLayer",
@@ -226,6 +230,73 @@ ___TEMPLATE_PARAMETERS___
 ]
 
 
+___SANDBOXED_JS_FOR_WEB_TEMPLATE___
+
+// Require the necessary APIs
+const injectScript = require('injectScript');
+const queryPermission = require('queryPermission');
+const encode = require('encodeUriComponent');
+const makeString = require('makeString');
+const log = require('logToConsole');
+
+const profityId = encode(makeString(data.profityId));
+const enableProfityLayer = data.enableProfityLayer;
+const getbackId = encode(makeString(data.getbackId));
+const orderValue = encode(makeString(data.orderValue));
+const orderNumber = encode(makeString(data.orderNumber));
+const voucherCode = data.voucherCode;
+const email = data.email;
+const subText = data.customInformation;
+const country = data.country;
+let baseUrl = '';
+
+
+
+switch (country){
+  case "ch":
+    baseUrl = 'https://static.profity.ch';
+    break;
+  case "at":
+    baseUrl = 'https://static.profity.at';
+    break;
+  case "de":
+    baseUrl = 'https://static.shopmate.de';
+    break;
+  case "pl":
+    baseUrl = 'https://static.pl.profity.shop';
+    break;
+  case "se":
+    baseUrl = 'https://static.profity.se';
+    break;
+  case "uk":
+    baseUrl = 'https://static.profity.uk';
+    break;
+  default:
+    baseUrl = 'https://static.profity.online';
+    break;    
+}
+
+if (data.type == 'landingpage'){
+  baseUrl += '/clients/main.js';
+  injectScript(baseUrl, data.gtmOnSuccess, data.gtmOnFailure);
+} else if(data.type == 'conversion') {
+  let profityUrl = baseUrl + '/clients/conversion.js?s=' + profityId + '&ordervalue=' + orderValue + '&ordernumber=' + orderNumber;
+  let getbackUrl = 'https://www.getback.ch/' + getbackId;
+
+  voucherCode ? profityUrl += '&vouchercode=' + encode(makeString(voucherCode)) : '';
+  email ? profityUrl += '&email=' + encode(makeString(email)) : '';
+  subText ? profityUrl += '&subtext=' + encode(makeString(subText)) : '';
+
+  injectScript(profityUrl);
+
+  if (enableProfityLayer === true){
+    injectScript(getbackUrl, data.gtmOnSuccess, data.gtmOnFailure);
+  }
+  
+  data.gtmOnSuccess();
+}
+
+
 ___WEB_PERMISSIONS___
 
 [
@@ -268,6 +339,10 @@ ___WEB_PERMISSIONS___
               {
                 "type": 1,
                 "string": "https://static.profity.se/*"
+              },
+              {
+                "type": 1,
+                "string": "https://static.profity.uk/*"
               }
             ]
           }
@@ -298,70 +373,6 @@ ___WEB_PERMISSIONS___
     "isRequired": true
   }
 ]
-
-
-___SANDBOXED_JS_FOR_WEB_TEMPLATE___
-
-// Require the necessary APIs
-const injectScript = require('injectScript');
-const queryPermission = require('queryPermission');
-const encode = require('encodeUriComponent');
-const makeString = require('makeString');
-const log = require('logToConsole');
-
-const profityId = encode(makeString(data.profityId));
-const enableProfityLayer = data.enableProfityLayer;
-const getbackId = encode(makeString(data.getbackId));
-const orderValue = encode(makeString(data.orderValue));
-const orderNumber = encode(makeString(data.orderNumber));
-const voucherCode = data.voucherCode;
-const email = data.email;
-const subText = data.customInformation;
-const country = data.country;
-let baseUrl = '';
-
-
-
-switch (country){
-  case "ch":
-    baseUrl = 'https://static.profity.ch';
-    break;
-  case "at":
-    baseUrl = 'https://static.profity.at';
-    break;
-  case "de":
-    baseUrl = 'https://static.shopmate.de';
-    break;
-  case "pl":
-    baseUrl = 'https://static.pl.profity.shop';
-    break;
-  case "se":
-    baseUrl = 'https://static.profity.se';
-    break;
-  default:
-    baseUrl = 'https://static.profity.online';
-    break;    
-}
-
-if (data.type == 'landingpage'){
-  baseUrl += '/clients/main.js';
-  injectScript(baseUrl, data.gtmOnSuccess, data.gtmOnFailure);
-} else if(data.type == 'conversion') {
-  let profityUrl = baseUrl + '/clients/conversion.js?s=' + profityId + '&ordervalue=' + orderValue + '&ordernumber=' + orderNumber;
-  let getbackUrl = 'https://www.getback.ch/' + getbackId;
-
-  voucherCode ? profityUrl += '&vouchercode=' + encode(makeString(voucherCode)) : '';
-  email ? profityUrl += '&email=' + encode(makeString(email)) : '';
-  subText ? profityUrl += '&subtext=' + encode(makeString(subText)) : '';
-
-  injectScript(profityUrl);
-
-  if (enableProfityLayer === true){
-    injectScript(getbackUrl, data.gtmOnSuccess, data.gtmOnFailure);
-  }
-  
-  data.gtmOnSuccess();
-}
 
 
 ___NOTES___
