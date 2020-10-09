@@ -350,6 +350,10 @@ ___WEB_PERMISSIONS___
               {
                 "type": 1,
                 "string": "https://static.profity.uk/*"
+              },
+              {
+                "type": 1,
+                "string": "https://static.profity.it/*"
               }
             ]
           }
