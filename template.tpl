@@ -10,7 +10,7 @@ ___INFO___
 {
   "displayName": "Profity Conversion Tracking",
   "description": "Profity Conversion Tracking Tag. For more information visit: https://ch.profity.online/en/",
-  "categories": ["CONVERSION_TRACKING", "MARKETING"],
+  "categories": ["CONVERSIONS", "MARKETING", "AFFILIATE_MARKETING"],
   "securityGroups": [],
   "id": "cvt_temp_public_id",
   "type": "TAG",
@@ -56,6 +56,10 @@ ___TEMPLATE_PARAMETERS___
       {
         "value": "uk",
         "displayValue": "UK"
+      },
+      {
+        "value": "it",
+        "displayValue": "Italy"
       }
     ],
     "displayName": "Country",
@@ -270,6 +274,9 @@ switch (country){
     break;
   case "uk":
     baseUrl = 'https://static.profity.uk';
+    break;
+  case "it":
+    baseUrl = 'https://static.profity.it';
     break;
   default:
     baseUrl = 'https://static.profity.online';
