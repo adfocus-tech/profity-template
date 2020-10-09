@@ -1,5 +1,7 @@
 homepage: "www.profity.online" ,
 documentation: "https://docs.profity.online" ,
 versions:
+- sha: 40775c7
+  changeNotes: Add Profity Italy
 - sha: 612081a
   changeNotes: Add Profity UK
