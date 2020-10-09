@@ -1,6 +1,8 @@
 homepage: "www.profity.online" ,
 documentation: "https://docs.profity.online" ,
 versions:
+- sha: ca3b70c
+  changeNotes: Update Template Permission for Profity IT
 - sha: 40775c7
   changeNotes: Add Profity Italy
 - sha: 612081a
